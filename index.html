@@ -25,7 +25,7 @@
 		}
 	</style>
 
-	<!--Стили для легенды-->
+	<!--Style for legend-->
 	<style type="text/css">
 		.legend {
 			color: #555;
@@ -83,9 +83,6 @@
 			"OpenStreetMap": basemap1,
 			"Positron": basemap2,
 		};
-
-		// Add layer switcher control to the map with defined base layers
-		L.control.layers(baseLayers).addTo(map);
 
 		// Add linear scale to the map
 		L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
@@ -160,24 +157,6 @@
 		// Display the 1st choropleth map by default
 		indicator1.addTo(map);
 
-		// Define the list of choropleth layers
-		const groupedOverlays = {
-			"Choropleth Maps": {
-				"Общая площадь жилых помещений на 1 жителя (м²)": indicator1,
-				"Общий коэффициент рождаемости (на 1000 человек)": indicator2,
-				"Общий коэффициент смертности (на 1000 человек)": indicator3
-			}
-		};
-
-		// Create grouping settings to display only one choropleth map at a time
-		const options = {
-			exclusiveGroups: ["Choropleth Maps"],
-			groupCheckboxes: true
-		};
-
-		// Create a new layer control that includes both base layers and choropleth maps
-		L.control.groupedLayers(baseLayers, groupedOverlays, options).addTo(map);
-
 		// Create legend
 		const legend = L.control({ position: 'bottomright' });
 
@@ -216,20 +195,41 @@
 
 		// Create an array of the federal subjects' administrative centers
 		const points = [
-			[51.958102, 85.960323, "Горно-Алтайск"],
-			[53.348114, 83.779388, "Барнаул"],
-			[52.286974, 104.305018, "Иркутск"],
-			[55.354472, 86.088445, "Кемерово"],
-			[56.015283, 92.893248, "Красноярск"],
-			[55.030204, 82.920430, "Новосибирск"],
-			[54.984856, 73.367463, "Омск"],
-			[56.484640, 84.947649, "Томск"],
-			[51.719086, 94.437757, "Кызыл"],
-			[53.722366, 91.443779, "Абакан"]
+			[51.958102, 85.960323, "Горно-Алтайск", "https://ru.wikipedia.org/wiki/Горно-Алтайск"],
+			[53.348114, 83.779388, "Барнаул", "https://ru.wikipedia.org/wiki/Барнаул"],
+			[52.286974, 104.305018, "Иркутск", "https://ru.wikipedia.org/wiki/Иркутск"],
+			[55.354472, 86.088445, "Кемерово", "https://ru.wikipedia.org/wiki/Кемерово"],
+			[56.015283, 92.893248, "Красноярск", "https://ru.wikipedia.org/wiki/Красноярск"],
+			[55.030204, 82.920430, "Новосибирск", "https://ru.wikipedia.org/wiki/Новосибирск"],
+			[54.984856, 73.367463, "Омск", "https://ru.wikipedia.org/wiki/Омск"],
+			[56.484640, 84.947649, "Томск", "https://ru.wikipedia.org/wiki/Томск"],
+			[51.719086, 94.437757, "Кызыл", "https://ru.wikipedia.org/wiki/Кызыл"],
+			[53.722366, 91.443779, "Абакан", "https://ru.wikipedia.org/wiki/Абакан"]
 		];
-
 		// Create a thematic layer for administrative centers as an object
 		const admin_centers = L.layerGroup();
+
+		// Create variable for storing svg icon
+		const svgAdm = `<svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  		<circle fill="#ffffff" stroke="#262626" stroke-width="50" cx="256" cy="256" r="200"/>
+  		<ellipse fill="#262626" cx="256" cy="256" rx="54" ry="57"/>
+		</svg>`;
+
+		// Create icon parameters
+		const admIcon = new L.Icon({
+			iconUrl: 'data:image/svg+xml;base64,' + btoa(svgAdm), // Icon URL
+			iconSize: [20, 20] // Icon size in pixels
+		});
+
+		// Using for loop to populate thematic layer with markers from created array, adding popup with center name
+		for (let i = 0; i < points.length; i++) {
+			const [lat, lng, popupText, wikiUrl] = points[i];
+			marker = new L.marker([lat, lng], { icon: admIcon }).bindPopup(popupText)
+				.on('dblclick', function () {
+					window.open(wikiUrl, '_blank');
+				})
+				.addTo(admin_centers);
+		}
 
 		// Use a for loop to populate the thematic layer with markers featuring coordinates and popup names from the array
 		for (let i = 0; i < points.length; i++) {
@@ -239,6 +239,28 @@
 
 		// Add the thematic layer of administrative centers to the map
 		admin_centers.addTo(map);
+
+		// Define the list of choropleth layers
+		const groupedOverlays = {
+			"Картограммы": {
+				"Общая площадь жилых помещений на 1 жителя (м²)": indicator1,
+				"Общий коэффициент рождаемости (на 1000 человек)": indicator2,
+				"Общий коэффициент смертности (на 1000 человек)": indicator3
+			},
+			"Прочие слои": {
+				"Административные центры": admin_centers
+			}
+		};
+
+		// Create grouping settings to display only one choropleth map at a time
+		const options = {
+			exclusiveGroups: ["Картограмма"],
+			groupCheckboxes: true
+		};
+
+		// Create a new layer control that includes both base layers and choropleth maps
+		L.control.groupedLayers(baseLayers, groupedOverlays, options).addTo(map);
+
 	</script>
 </body>
 
