@@ -210,9 +210,9 @@
 		const admin_centers = L.layerGroup();
 
 		// Create variable for storing svg icon
-		const svgAdm = `<svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  		<circle fill="#ffffff" stroke="#262626" stroke-width="50" cx="256" cy="256" r="200"/>
-  		<ellipse fill="#262626" cx="256" cy="256" rx="54" ry="57"/>
+		const svgAdm = `<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+    	<circle cx="10" cy="10" r="9" fill="#ffffff" stroke="#262626" stroke-width="1.5"/>
+    	<ellipse cx="10" cy="10" rx="4.5" ry="4.5" fill="#262626"/>
 		</svg>`;
 
 		// Create icon parameters
@@ -230,16 +230,7 @@
 				})
 				.addTo(admin_centers);
 		}
-
-		// Use a for loop to populate the thematic layer with markers featuring coordinates and popup names from the array
-		for (let i = 0; i < points.length; i++) {
-			const [lat, lng, popupText] = points[i];
-			marker = new L.marker([lat, lng]).bindPopup(popupText).addTo(admin_centers);
-		}
-
-		// Add the thematic layer of administrative centers to the map
-		admin_centers.addTo(map);
-
+		
 		// Define the list of choropleth layers
 		const groupedOverlays = {
 			"Картограммы": {
@@ -254,7 +245,7 @@
 
 		// Create grouping settings to display only one choropleth map at a time
 		const options = {
-			exclusiveGroups: ["Картограмма"],
+			exclusiveGroups: ["Картограммы"],
 			groupCheckboxes: true
 		};
 
