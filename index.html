@@ -73,8 +73,11 @@
 
 		//Create first base layer as object
 		const basemap1 = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
 		//Create second base layer as object
+
 		const basemap2 = new L.TileLayer('https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://a.basemaps.cartocdn.com/light_all/">Positron</a> Contributors' });
+
 		//Add first base layer to map
 		map.addLayer(basemap1);
 
@@ -230,11 +233,14 @@
 				})
 				.addTo(admin_centers);
 		}
-		
+
+		// Add the thematic layer of administrative centers to the map
+		admin_centers.addTo(map);
+
 		// Define the list of choropleth layers
 		const groupedOverlays = {
 			"Картограммы": {
-				"Общая площадь жилых помещений на 1 жителя (м²)": indicator1,
+				"Общая площадь жилого пространства на 1 человека (м²)": indicator1,
 				"Общий коэффициент рождаемости (на 1000 человек)": indicator2,
 				"Общий коэффициент смертности (на 1000 человек)": indicator3
 			},
