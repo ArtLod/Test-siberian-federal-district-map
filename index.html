@@ -288,6 +288,71 @@
 		// Add fullscreen button to the map
 		map.addControl(fullscreenControll);
 
+		// Add Geojson layer 
+		const searchLayer = L.geoJson(boundary, {
+			style: function (feature) {
+				return {
+					fillColor: 'transparent',
+					color: 'transparent',
+				};
+			}
+		});
+
+		// Add GeoJSON layer to the map
+		searchLayer.addTo(map).bringToBack();
+
+		// Create settings for the map search tool
+		const searchControl = new L.Control.Search({
+			layer: searchLayer, // Specify the variable containing the GeoJSON layer added to the map; search will be performed on its properties
+			propertyName: 'Название субъекта РФ', // Specify the column name whose values will be used for search
+			marker: false,
+			textPlaceholder: 'Search', // Specify the default text displayed in the search input
+			position: 'topleft', // Specify the position of the search button on the map
+			moveToLocation: function (latlng, title, map) {
+				const zoom = map.getBoundsZoom(latlng.layer.getBounds());
+				map.setView(latlng, zoom); // Function that zooms the map view to the object found in the search
+			}
+		});
+
+		// Define a variable for the default style of the highlighted object (search result)
+		let highlightedLayer = null;
+
+		searchControl.on('search:locationfound', function (e) {
+			// Reset the style of the previously highlighted object if it exists
+			if (highlightedLayer && highlightedLayer !== e.layer) {
+				searchLayer.resetStyle(highlightedLayer);
+			}
+
+			highlightedLayer = e.layer;
+
+			// Apply outline to the highlighted object
+			highlightedLayer.setStyle({
+				color: '#0f0'
+			});
+		});
+
+		// Reset the style when clicking anywhere on the map
+		map.on('click', function () {
+			if (highlightedLayer) {
+				searchLayer.resetStyle(highlightedLayer);
+				highlightedLayer = null;
+			}
+		});
+
+		// Add the search tool button to the map
+		map.addControl(searchControl);
+
+		// Specify settings for the map home button
+		const homeControl = L.easyButton('fa-home', function (btn, map) {
+			map.flyTo(mapOptions.center, mapOptions.zoom, { // Function that creates a flying animation over the map
+				animate: true,
+				duration: 1 // Set animation duration in seconds
+			});
+		});
+
+		// Add the home button to the map
+		homeControl.addTo(map);
+
 	</script>
 </body>
 
