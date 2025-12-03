@@ -120,18 +120,6 @@ function updateLegendContent(limits, colors, container) {
 
 legend.addTo(map);
 
-// Configure legend updates when switching between choropleth maps
-map.on('overlayadd', function (e) {
-    const layer = e.layer;
-    if (layer === indicator1) {
-        updateLegendContent(indicator1.options.limits, indicator1.options.colors, legend.getContainer());
-    } else if (layer === indicator2) {
-        updateLegendContent(indicator2.options.limits, indicator2.options.colors, legend.getContainer());
-    } else if (layer === indicator3) {
-        updateLegendContent(indicator3.options.limits, indicator3.options.colors, legend.getContainer());
-    }
-});
-
 // Create an array of the federal subjects' administrative centers
 const points = [
     [51.958102, 85.960323, "Горно-Алтайск", "https://ru.wikipedia.org/wiki/Горно-Алтайск"],
@@ -193,6 +181,63 @@ const options = {
 
 // Create a new layer control that includes both base layers and choropleth maps
 L.control.groupedLayers(baseLayers, groupedOverlays, options).addTo(map);
+
+// Link layer switching with theme changes
+map.on('overlayadd', function (e) {
+    const layer = e.layer;
+    
+    if (layer === indicator1) {
+        // Set blue theme
+        document.body.classList.remove('green-theme', 'red-theme');
+        document.body.classList.add('blue-theme');
+        
+        // Activate blue dot
+        document.querySelectorAll('.color-dot').forEach(dot => {
+            dot.classList.remove('active');
+        });
+        document.querySelector('.dot-blue').classList.add('active');
+        
+        // Update map title
+        updateMapTitle('blue');
+        
+    } else if (layer === indicator2) {
+        // Set green theme
+        document.body.classList.remove('blue-theme', 'red-theme');
+        document.body.classList.add('green-theme');
+        
+        // Activate green dot
+        document.querySelectorAll('.color-dot').forEach(dot => {
+            dot.classList.remove('active');
+        });
+        document.querySelector('.dot-green').classList.add('active');
+        
+        // Update map title
+        updateMapTitle('green');
+        
+    } else if (layer === indicator3) {
+        // Set red theme
+        document.body.classList.remove('blue-theme', 'green-theme');
+        document.body.classList.add('red-theme');
+        
+        // Activate red dot
+        document.querySelectorAll('.color-dot').forEach(dot => {
+            dot.classList.remove('active');
+        });
+        document.querySelector('.dot-red').classList.add('active');
+        
+        // Update map title
+        updateMapTitle('red');
+    }
+    
+    // Update legend (этот код у вас уже есть, убедитесь что он работает)
+    if (layer === indicator1) {
+        updateLegendContent(indicator1.options.limits, indicator1.options.colors, legend.getContainer());
+    } else if (layer === indicator2) {
+        updateLegendContent(indicator2.options.limits, indicator2.options.colors, legend.getContainer());
+    } else if (layer === indicator3) {
+        updateLegendContent(indicator3.options.limits, indicator3.options.colors, legend.getContainer());
+    }
+});
 
 // Set fullscreen button parameters
 const fullscreenControll = new L.Control.Fullscreen({
@@ -269,3 +314,93 @@ const homeControl = L.easyButton('fa-home', function (btn, map) {
 
 // Add the home button to the map
 homeControl.addTo(map);
+
+// Function to switch theme
+function switchTheme(theme) {
+    // Remove all theme classes
+    document.body.classList.remove('blue-theme', 'green-theme', 'red-theme');
+    
+    // Add selected theme class
+    document.body.classList.add(theme + '-theme');
+    
+    // Update active state for color dots
+    document.querySelectorAll('.color-dot').forEach(dot => {
+        dot.classList.remove('active');
+    });
+    
+    // Activate the clicked dot
+    document.querySelector(`.dot-${theme}`).classList.add('active');
+    
+    // Update map title based on selected theme
+    updateMapTitle(theme);
+
+        // Switch map layers based on theme
+    if (theme === 'blue') {
+        // Remove other layers
+        if (map.hasLayer(indicator2)) map.removeLayer(indicator2);
+        if (map.hasLayer(indicator3)) map.removeLayer(indicator3);
+        
+        // Add blue layer if not already present
+        if (!map.hasLayer(indicator1)) {
+            indicator1.addTo(map);
+        }
+        
+        // Update legend
+        updateLegendContent(indicator1.options.limits, indicator1.options.colors, legend.getContainer());
+        
+    } else if (theme === 'green') {
+        // Remove other layers
+        if (map.hasLayer(indicator1)) map.removeLayer(indicator1);
+        if (map.hasLayer(indicator3)) map.removeLayer(indicator3);
+        
+        // Add green layer if not already present
+        if (!map.hasLayer(indicator2)) {
+            indicator2.addTo(map);
+        }
+        
+        // Update legend
+        updateLegendContent(indicator2.options.limits, indicator2.options.colors, legend.getContainer());
+        
+    } else if (theme === 'red') {
+        // Remove other layers
+        if (map.hasLayer(indicator1)) map.removeLayer(indicator1);
+        if (map.hasLayer(indicator2)) map.removeLayer(indicator2);
+        
+        // Add red layer if not already present
+        if (!map.hasLayer(indicator3)) {
+            indicator3.addTo(map);
+        }
+        
+        // Update legend
+        updateLegendContent(indicator3.options.limits, indicator3.options.colors, legend.getContainer());
+    }
+}
+
+// Function to update map title based on theme
+function updateMapTitle(theme) {
+    const titleMap = {
+        'blue': 'Жилая площадь на душу населения',
+        'green': 'Коэффициент рождаемости',
+        'red': 'Коэффициент смертности'
+    };
+    
+    const header = document.querySelector('#header h1');
+    if (header) {
+        header.textContent = `${titleMap[theme]} Сибирского ФО`;
+    }
+}
+
+// Initialize with blue theme as default when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Set blue theme as default
+    document.body.classList.add('blue-theme');
+    
+    // Activate blue dot
+    const blueDot = document.querySelector('.dot-blue');
+    if (blueDot) {
+        blueDot.classList.add('active');
+    }
+    
+    // Update map title
+    updateMapTitle('blue');
+});
